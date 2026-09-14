@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()  # reads ANTHROPIC_API_KEY from .env
 
 from anthropic import Anthropic
-from tools import TOOLS, execute_tool
+from tools import load
+TOOLS, execute_tool = load([]) 
 
 # Start on Haiku while learning the loop — half the input cost of Sonnet.
 # Switch to "claude-sonnet-5" once the plumbing works.
