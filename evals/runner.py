@@ -14,6 +14,7 @@ Usage:
     python evals/runner.py --model claude-sonnet-5
 """
 import argparse
+import os
 import json
 import shutil
 import subprocess
@@ -81,7 +82,8 @@ def run_task(task_dir: Path, model: str, toolsets: list, max_turns: int):
         try:
             v = subprocess.run(
                 ["bash", str(verify)], cwd=tmp,
-                capture_output=True, text=True, timeout=60,
+                capture_output=True, text=True, timeout=60,   
+                env={**os.environ, "TASK_DIR": str(task_dir)},
             )
             result["passed"] = v.returncode == 0
             if v.returncode != 0 and v.stderr.strip():
@@ -100,6 +102,7 @@ def main():
     ap.add_argument("--toolset", action="append", default=[])
     ap.add_argument("--max-turns", type=int, default=12)
     ap.add_argument("--out", default="evals/results.json")
+    ap.add_argument("--n", type=int, default=1, help="Runs per task")
     args = ap.parse_args()
 
     suite_dir = ROOT / "evals" / "tasks" / args.suite
@@ -117,13 +120,21 @@ def main():
 
     results = []
     for t in tasks:
+        runs = []
         print(f"  {t.name:<28}", end="", flush=True)
-        r = run_task(t, args.model, args.toolset, args.max_turns)
-        results.append(r)
-        mark = "PASS" if r["passed"] else "FAIL"
-        extra = f"  ({r['error']})" if r.get("error") else ""
-        print(f"{mark}  {r.get('turns','?'):>2} turns  "
-              f"{r.get('seconds','?'):>5}s{extra}")
+        for i in range(args.n):
+            r = run_task(t, args.model, args.toolset, args.max_turns)
+            r["run"] = i + 1
+            runs.append(r)
+            results.append(r)
+            print("." if r["passed"] else "x", end="", flush=True)
+
+        n_pass = sum(x["passed"] for x in runs)
+        avg_turns = sum(x.get("turns", 0) for x in runs) / len(runs)
+        pad = " " * max(1, 8 - args.n)
+        print(f"{pad}{n_pass}/{args.n} passed   {avg_turns:>4.1f} turns avg")
+        if 0 < n_pass < args.n:
+            print(f"    ^ inconsistent across runs")
 
     # summary
     n = len(results)

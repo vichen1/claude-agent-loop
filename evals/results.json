@@ -2,38 +2,101 @@
   "model": "claude-haiku-4-5-20251001",
   "toolsets": [],
   "suite": "swe",
-  "passed": 3,
-  "total": 3,
-  "input_tokens": 54137,
-  "output_tokens": 6261,
-  "cost_usd": 0.0854,
+  "passed": 9,
+  "total": 9,
+  "input_tokens": 105730,
+  "output_tokens": 19935,
+  "cost_usd": 0.2054,
   "results": [
     {
       "task": "001-empty-list",
       "passed": true,
       "error": null,
-      "turns": 6,
-      "input_tokens": 9018,
-      "output_tokens": 573,
-      "seconds": 6.7
+      "turns": 4,
+      "input_tokens": 5742,
+      "output_tokens": 484,
+      "seconds": 4.6,
+      "run": 1
+    },
+    {
+      "task": "001-empty-list",
+      "passed": true,
+      "error": null,
+      "turns": 4,
+      "input_tokens": 5843,
+      "output_tokens": 626,
+      "seconds": 6.2,
+      "run": 2
+    },
+    {
+      "task": "001-empty-list",
+      "passed": true,
+      "error": null,
+      "turns": 4,
+      "input_tokens": 5841,
+      "output_tokens": 610,
+      "seconds": 6.3,
+      "run": 3
     },
     {
       "task": "002-off-by-one",
       "passed": true,
       "error": null,
       "turns": 5,
-      "input_tokens": 8442,
-      "output_tokens": 1243,
-      "seconds": 17.2
+      "input_tokens": 8131,
+      "output_tokens": 997,
+      "seconds": 8.3,
+      "run": 1
+    },
+    {
+      "task": "002-off-by-one",
+      "passed": true,
+      "error": null,
+      "turns": 6,
+      "input_tokens": 11015,
+      "output_tokens": 1196,
+      "seconds": 9.9,
+      "run": 2
+    },
+    {
+      "task": "002-off-by-one",
+      "passed": true,
+      "error": null,
+      "turns": 5,
+      "input_tokens": 8126,
+      "output_tokens": 1071,
+      "seconds": 12.4,
+      "run": 3
     },
     {
       "task": "003-no-bug-control",
       "passed": true,
       "error": null,
-      "turns": 12,
-      "input_tokens": 36677,
-      "output_tokens": 4445,
-      "seconds": 35.5
+      "turns": 8,
+      "input_tokens": 19441,
+      "output_tokens": 6217,
+      "seconds": 41.5,
+      "run": 1
+    },
+    {
+      "task": "003-no-bug-control",
+      "passed": true,
+      "error": null,
+      "turns": 8,
+      "input_tokens": 23624,
+      "output_tokens": 5052,
+      "seconds": 35.9,
+      "run": 2
+    },
+    {
+      "task": "003-no-bug-control",
+      "passed": true,
+      "error": null,
+      "turns": 8,
+      "input_tokens": 17967,
+      "output_tokens": 3682,
+      "seconds": 28.3,
+      "run": 3
     }
   ]
 }

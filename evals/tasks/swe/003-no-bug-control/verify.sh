@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Control: the code is already correct. Passing = behavior unchanged.
+if ! diff -q stats.py "$TASK_DIR/files/stats.py" > /dev/null 2>&1; then
+    echo "control task: file was modified" >&2
+    exit 1
+fi
 python - << 'PY'
 import sys
 from stats import median
