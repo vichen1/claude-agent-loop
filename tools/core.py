@@ -48,6 +48,27 @@ TOOLS = [
             "required": ["command"],
         },
     },
+    {
+        "name": "grep_codebase",
+        "description": (
+            "Search file contents for a regex pattern. Returns file:line:text. "
+            "Use this FIRST to locate relevant code instead of reading files blindly. "
+            "If two searches return no matches, stop guessing patterns — use "
+            "list_dir or read_file to see what the code actually calls things."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "pattern": {"type": "string", "description": "Regex to search for"},
+                "path": {"type": "string", "default": "."},
+                "file_glob": {
+                    "type": "string",
+                    "description": "Optional filter, e.g. '*.py'",
+                },
+            },
+            "required": ["pattern"],
+        },
+    },
 ]
 
 # ---- Execution ----
@@ -87,7 +108,31 @@ def execute_tool(name: str, tool_input: dict) -> str:
                 timeout=30,
             )
             return f"[exit {result.returncode}]\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        if name == "grep_codebase":
+            import shutil
+            pattern = tool_input["pattern"]
+            path = tool_input.get("path", ".")
+            glob = tool_input.get("file_glob")
 
+            if shutil.which("rg"):
+                cmd = ["rg", "--line-number", "--no-heading", "--color", "never",
+                       "--max-count", "10", pattern, path]
+                if glob:
+                    cmd[1:1] = ["--glob", glob]
+            else:
+                cmd = ["grep", "-rn", "--exclude-dir=.venv", "--exclude-dir=.git",
+                       "--exclude-dir=__pycache__", pattern, path]
+
+            r = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+            lines = [l for l in r.stdout.splitlines() if l.strip()]
+
+            if not lines:
+                return f"No matches for '{pattern}' in {path}."
+
+            out = "\n".join(lines[:50])
+            if len(lines) > 50:
+                out += f"\n... {len(lines) - 50} more matches. Narrow your pattern."
+            return out
         return f"Unknown tool: {name}"
 
     except Exception as e:

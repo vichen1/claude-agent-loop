@@ -14,7 +14,7 @@ from tools import load
 # Start on Haiku while learning the loop — half the input cost of Sonnet.
 # Switch to "claude-sonnet-5" once the plumbing works.
 MODEL = "claude-haiku-4-5-20251001"
-MAX_TURNS = 6  # safety cap so a buggy loop can't run forever
+MAX_TURNS = 12  # safety cap so a buggy loop can't run forever
 
 SYSTEM_PROMPT = """You are a careful coding assistant with access to a local
 filesystem and shell via tools. Before making changes:
