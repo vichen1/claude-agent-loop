@@ -10,7 +10,6 @@ load_dotenv()  # reads ANTHROPIC_API_KEY from .env
 
 from anthropic import Anthropic
 from tools import load
-TOOLS, execute_tool = load([]) 
 
 # Start on Haiku while learning the loop — half the input cost of Sonnet.
 # Switch to "claude-sonnet-5" once the plumbing works.
@@ -28,7 +27,7 @@ filesystem and shell via tools. Before making changes:
 client = Anthropic()  # picks up ANTHROPIC_API_KEY automatically
 
 
-def run_agent(task: str):
+def run_agent(task: str, TOOLS, execute_tool):
     messages = [{"role": "user", "content": task}]
 
     for turn in range(MAX_TURNS):
@@ -79,7 +78,20 @@ def run_agent(task: str):
 
 
 if __name__ == "__main__":
-    import sys
+    import argparse
 
-    task = " ".join(sys.argv[1:]) or "List the files in the current directory."
-    run_agent(task)
+    parser = argparse.ArgumentParser(description="Minimal coding agent.")
+    parser.add_argument("task", help="What you want the agent to do.")
+    parser.add_argument(
+        "--toolset", action="append", default=[],
+        help="Optional toolset to load (repeatable): swe, ml. core is always on.",
+    )
+    args = parser.parse_args()
+
+    try:
+        TOOLS, execute_tool = load(args.toolset)
+    except ValueError as e:
+        parser.error(str(e))
+    print(f"[toolsets] core + {args.toolset or 'none'} -> {len(TOOLS)} tools")
+
+    run_agent(args.task, TOOLS, execute_tool)
