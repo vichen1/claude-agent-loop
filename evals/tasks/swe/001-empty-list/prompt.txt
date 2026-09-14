@@ -1,0 +1,1 @@
+calculate_average in utils.py crashes when given an empty list. Fix it.

@@ -1,0 +1,1 @@
+chunk() in chunker.py is dropping data. Find the bug and fix it.
