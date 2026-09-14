@@ -1,0 +1,39 @@
+{
+  "model": "claude-haiku-4-5-20251001",
+  "toolsets": [],
+  "suite": "swe",
+  "passed": 3,
+  "total": 3,
+  "input_tokens": 54137,
+  "output_tokens": 6261,
+  "cost_usd": 0.0854,
+  "results": [
+    {
+      "task": "001-empty-list",
+      "passed": true,
+      "error": null,
+      "turns": 6,
+      "input_tokens": 9018,
+      "output_tokens": 573,
+      "seconds": 6.7
+    },
+    {
+      "task": "002-off-by-one",
+      "passed": true,
+      "error": null,
+      "turns": 5,
+      "input_tokens": 8442,
+      "output_tokens": 1243,
+      "seconds": 17.2
+    },
+    {
+      "task": "003-no-bug-control",
+      "passed": true,
+      "error": null,
+      "turns": 12,
+      "input_tokens": 36677,
+      "output_tokens": 4445,
+      "seconds": 35.5
+    }
+  ]
+}

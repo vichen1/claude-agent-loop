@@ -14,6 +14,7 @@ from tools import load
 # Start on Haiku while learning the loop — half the input cost of Sonnet.
 # Switch to "claude-sonnet-5" once the plumbing works.
 MODEL = "claude-haiku-4-5-20251001"
+AUTO_APPROVE = False 
 MAX_TURNS = 12  # safety cap so a buggy loop can't run forever
 
 SYSTEM_PROMPT = """You are a careful coding assistant with access to a local
@@ -27,10 +28,13 @@ filesystem and shell via tools. Before making changes:
 client = Anthropic()  # picks up ANTHROPIC_API_KEY automatically
 
 
-def run_agent(task: str, TOOLS, execute_tool):
+def run_agent(task: str, TOOLS, execute_tool, quiet=False):
     messages = [{"role": "user", "content": task}]
+    total_in = total_out = 0
+    turns = 0
 
     for turn in range(MAX_TURNS):
+        turns += 1
         response = client.messages.create(
             model=MODEL,
             max_tokens=4096,
@@ -39,42 +43,42 @@ def run_agent(task: str, TOOLS, execute_tool):
             messages=messages,
         )
 
-        # Watch these numbers climb — input grows every turn because the whole
-        # history is resent. That's why prompt caching and compaction exist.
-        print(
-            f"\n[tokens] in={response.usage.input_tokens} "
-            f"out={response.usage.output_tokens}"
-        )
+        total_in += response.usage.input_tokens
+        total_out += response.usage.output_tokens
 
-        for block in response.content:
-            if block.type == "text":
-                print(f"[Claude] {block.text}")
+        if not quiet:
+            print(
+                f"\n[tokens] in={response.usage.input_tokens} "
+                f"out={response.usage.output_tokens}"
+            )
+            for block in response.content:
+                if block.type == "text":
+                    print(f"[Claude] {block.text}")
 
         messages.append({"role": "assistant", "content": response.content})
 
         if response.stop_reason != "tool_use":
-            break  # Claude is done — no more tools requested
+            break
 
-        # Execute every tool call in this turn, collect results
         tool_results = []
         for block in response.content:
             if block.type == "tool_use":
-                print(f"[tool] {block.name}({block.input})")
+                if not quiet:
+                    print(f"[tool] {block.name}({block.input})")
                 result = execute_tool(block.name, block.input)
-                tool_results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": result,
-                    }
-                )
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": result,
+                })
 
         messages.append({"role": "user", "content": tool_results})
 
     else:
-        print(f"\n[stopped: hit MAX_TURNS={MAX_TURNS}]")
+        if not quiet:
+            print(f"\n[stopped: hit MAX_TURNS={MAX_TURNS}]")
 
-    return messages
+    return {"turns": turns, "input_tokens": total_in, "output_tokens": total_out}
 
 
 if __name__ == "__main__":

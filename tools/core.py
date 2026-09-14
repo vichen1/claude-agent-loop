@@ -92,6 +92,9 @@ TOOLS = [
 DANGEROUS = {"run_bash", "write_file", "patch_file"}
 
 def confirm(name: str, tool_input: dict) -> bool:
+    import agent
+    if getattr(agent, "AUTO_APPROVE", False):
+        return True
     if name not in DANGEROUS:
         return True
     print(f"\n  AGENT WANTS TO: {name}")
