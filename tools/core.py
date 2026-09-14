@@ -69,11 +69,27 @@ TOOLS = [
             "required": ["pattern"],
         },
     },
+    {
+        "name": "patch_file",
+        "description": (
+            "Replace an exact string in a file. old_str must appear EXACTLY ONCE — "
+            "include surrounding lines to make it unique. Prefer this over rewriting "
+            "whole files: it is cheaper and cannot silently drop unrelated code."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string"},
+                "old_str": {"type": "string", "description": "Exact text to replace, whitespace included"},
+                "new_str": {"type": "string", "description": "Replacement text"},
+            },
+            "required": ["path", "old_str", "new_str"],
+        },
+    },
 ]
 
 # ---- Execution ----
-DANGEROUS = {"run_bash", "write_file"}
-
+DANGEROUS = {"run_bash", "write_file", "patch_file"}
 
 def confirm(name: str, tool_input: dict) -> bool:
     if name not in DANGEROUS:
@@ -133,6 +149,21 @@ def execute_tool(name: str, tool_input: dict) -> str:
             if len(lines) > 50:
                 out += f"\n... {len(lines) - 50} more matches. Narrow your pattern."
             return out
+        if name == "patch_file":
+            p = Path(tool_input["path"])
+            if not p.exists():
+                return f"Error: {p} does not exist."
+            content = p.read_text()
+            old = tool_input["old_str"]
+            count = content.count(old)
+            if count == 0:
+                return (f"Error: old_str not found in {p}. "
+                        "Read the file and copy the exact text, including whitespace.")
+            if count > 1:
+                return (f"Error: old_str appears {count} times in {p}. "
+                        "Include more surrounding lines to make it unique.")
+            p.write_text(content.replace(old, tool_input["new_str"]))
+            return f"Patched {p} (1 replacement)."
         return f"Unknown tool: {name}"
 
     except Exception as e:
