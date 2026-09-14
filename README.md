@@ -37,9 +37,7 @@ core of every agent, including Claude Code itself.
 - **Add tools**: web search, a code-diff/patch tool, git operations.
 - **Parallel tool calls**: a single turn can contain multiple `tool_use`
   blocks — this scaffold already handles that (see the loop in `agent.py`).
-- **Permissions**: right now `run_bash` and `write_file` execute
-  unconditionally. For anything beyond a sandbox, add a confirmation step
-  or an allowlist before executing.
+- **Permissions**: `run_bash` and `write_file` prompt for y/n confirmation before executing. Denials are returned to Claude as a tool result rather than raised, so the agent can adapt instead of crashing.
 - **Context management**: long sessions will grow `messages` indefinitely;
   look into prompt caching and context compaction once this gets used for
   real tasks.
